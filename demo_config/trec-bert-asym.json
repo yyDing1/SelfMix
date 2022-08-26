@@ -9,7 +9,7 @@
     "class_reg": false,
 
     "dataset_name": "trec",
-    "train_file_path": "./data/trec/train.csv",
+    "train_file_path": "./data/trec/train_corrupted.csv",
     "eval_file_path": "./data/trec/test.csv",
     "batch_size": 32,
     "batch_size_mix": 16,

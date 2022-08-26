@@ -1,2 +1,3 @@
 *.pt
 bert-base-uncased
+__pycache__

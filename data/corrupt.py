@@ -1,4 +1,3 @@
-from random import randint
 import pandas as pd
 import argparse
 import numpy as np

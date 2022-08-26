@@ -29,10 +29,10 @@ We evaluate our strategy under the following two types of label noise
 * Asymmetric noise (Asym): Following [Chen et al.](https://arxiv.org/abs/1905.05040), we choose a certain proportion of samples and flip their labels to the corresponding class according to the asymmetric noise transition matrix.
 * Instance-dependent Noise (IDN): Following [Algan and Ulusoy](https://arxiv.org/abs/2003.10471), we train an LSTM classifier on a small set of the original training data and flip the origin labels to the class with the highest prediction.
 
-You can construct noisy datsets by the following command (i.e, Trec 0.4asym),
+You can construct noisy datsets by the following command (e.g., Trec 0.4asym),
 
 ```python
-python corrupt.py \
+python data/corrupt.py \
     --src_data_path data/trec/train.csv \
     --save_path data/trec/train_corrupted.csv \
     --noise_type asym \
