@@ -1,0 +1,5 @@
+transformers=4.18.0
+torch
+numpy
+scikit-learn
+pandas
