@@ -1,6 +1,6 @@
 ## SelfMix: Robust Learning Against Textual Label Noise with Self-Mixup Training
 
-This repository contains the code and pre-trained models for our paper [SelfMix: Robust Learning Against Textual Label Noise with Self-Mixup Training]
+This repository contains the code and pre-trained models for our paper [SelfMix: Robust Learning Against Textual Label Noise with Self-Mixup Training]()
 
 
 ## Overview
@@ -39,7 +39,7 @@ python data/corrupt.py \
     --noise_ratio 0.4
 ```
 
-Since generating IDN a bit more complex, we provide datasets of our experiments directly [here]().
+Since generating IDN is a bit more complex, we provide datasets of our experiments directly [here]().
 
 ### Hyperparameters
 
@@ -51,7 +51,7 @@ We use the following hyperparamters for training SelfMix:
 | `lambda_r` | 0.3 | 0.5 | 0.3 |
 | `class_reg` | False | False | True |
 
-## Training
+## Train
 
 In the following section, we describe how to train a SelfMix model by using our code.
 
@@ -80,7 +80,7 @@ Details about the meaning of parameters can be seen in our paper and `ModelArgum
 Similarly, you can run evaluation by the following command,
 
 ```bash
-python evaluation.py demo_config.trec-bert_eval.json
+python evaluation.py demo_config/trec-bert_eval.json
 ```
 
 Details about parameters can be seen in Class `ModelArguments` and `DataEvalArguments` in `evaluation.py`.
