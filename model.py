@@ -4,14 +4,14 @@ from transformers import AutoModel
 
 
 class Bert4Classify(nn.Module):
-    def __init__(self, model_args, num_classes):
+    def __init__(self, pretrained_model_name_or_path, dropout_rate, num_classes):
         super(Bert4Classify, self).__init__()
-        self.encoder = AutoModel.from_pretrained(model_args.model_name_or_path)
-        d_model = 768 if 'bert' in model_args.model_name_or_path else 1024
+        self.encoder = AutoModel.from_pretrained(pretrained_model_name_or_path)
+        d_model = 768 if 'bert' in pretrained_model_name_or_path else 1024
         self.mlp = nn.Sequential(
             nn.Linear(d_model, d_model),
             nn.Tanh(),
-            nn.Dropout(model_args.dropout_rate),
+            nn.Dropout(dropout_rate),
             nn.Linear(d_model, num_classes)
         )
 
@@ -31,3 +31,11 @@ class Bert4Classify(nn.Module):
     def classify(self, x):
         output = self.mlp(x)
         return output
+    
+    def save_model(self, model_save_path):
+        torch.save(self.state_dict(), model_save_path)
+    
+    def load_model(self, model_load_path):
+        model_state_dict = torch.load(model_load_path)
+        self.load_state_dict(model_state_dict)
+        

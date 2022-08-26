@@ -3,7 +3,7 @@ from typing import Optional, Union, List, Dict, Tuple
 import logging, sys, os, random
 import torch
 import numpy as np
-from data import *
+from datasets import *
 from model import *
 from trainer import SelfMixTrainer
 
@@ -25,7 +25,7 @@ class ModelArguments:
     """
     
     # Huggingface's original arguments
-    model_name_or_path: Optional[str] = field(
+    pretrained_model_name_or_path: Optional[str] = field(
         default='bert-base-uncased',
         metadata={
             "help": "The pretrained model checkpoint for weights initialization."
@@ -151,6 +151,10 @@ class OurTrainingArguments:
         default=1,
         metadata={"help": "Gradient accumulation step"}
     )
+    model_save_path: Optional[str] = field(
+        default=None,
+        metadata={"help": "The path to save model"}
+    )
 
     
 def main():
@@ -174,13 +178,16 @@ def main():
     set_seed(training_args.seed)
     
     # load data
-    datasets = load_dataset(data_args)
-    tokenizer = AutoTokenizer.from_pretrained(model_args.model_name_or_path)
-    selfmix_train_data = SelfMixData(data_args, datasets['train'], tokenizer)
-    selfmix_eval_data = SelfMixData(data_args, datasets['eval'], tokenizer)
+    train_datasets, train_num_classes = load_dataset(data_args.train_file_path, data_args.dataset_name)
+    eval_datasets, eval_num_classes = load_dataset(data_args.eval_file_path, data_args.dataset_name)
+    assert train_num_classes == eval_num_classes
+    
+    tokenizer = AutoTokenizer.from_pretrained(model_args.pretrained_model_name_or_path)
+    selfmix_train_data = SelfMixData(data_args, train_datasets, tokenizer)
+    selfmix_eval_data = SelfMixData(data_args, eval_datasets, tokenizer)
     
     # load model
-    model = Bert4Classify(model_args, datasets['num_classes'])
+    model = Bert4Classify(model_args.pretrained_model_name_or_path, model_args.dropout_rate, train_num_classes)
     
     # build trainer
     trainer = SelfMixTrainer(

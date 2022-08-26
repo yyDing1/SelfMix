@@ -31,7 +31,7 @@ We evaluate our strategy under the following two types of label noise
 
 You can construct noisy datsets by the following command (e.g., Trec 0.4asym),
 
-```python
+```bash
 python data/corrupt.py \
     --src_data_path data/trec/train.csv \
     --save_path data/trec/train_corrupted.csv \
@@ -65,14 +65,22 @@ pip install -r requirements.txt
 
 ### Quick Start
 
-We list some demo config in folder `demo_config`, you can just use the demo config to train: 
+We list some demo config in folder `demo_config`, you can just use the demo config to train,
 
-```python
-python train.py demo_config/trec-bert-asym.json
+```bash
+python train.py demo_config/trec-bert-asym_train.json
 ```
 
 ### Parameters
 
 Details about the meaning of parameters can be seen in our paper and `ModelArguments`, `DataTrainingArguments` and `OurTrainingArguments` in `train.py`
 
+## Evaluation
 
+Similarly, you can run evaluation by the following command,
+
+```bash
+python evaluation.py demo_config.trec-bert_eval.json
+```
+
+Details about parameters can be seen in Class `ModelArguments` and `DataEvalArguments` in `evaluation.py`.

@@ -1,0 +1,6 @@
+{
+    "model_name_or_path": "save_model/bert-selfmix",
+    "pretrained_model_name_or_path": "bert-base-uncased",
+    "dataset_name": "trec",
+    "batch_size": 32
+}

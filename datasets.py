@@ -23,26 +23,19 @@ class DataToDataset(Dataset):
         return self.texts[index], self.labels[index]
     
 
-def load_dataset(data_args):
-    extension_train = data_args.train_file_path.split(".")[-1]
-    extension_eval = data_args.eval_file_path.split(".")[-1]
-    assert(extension_train == 'csv' and extension_eval == 'csv')
+def load_dataset(data_path, dataset_name):
+    extension = data_path.split(".")[-1]
+    assert extension == 'csv'
     
-    train_data = pd.read_csv(data_args.train_file_path, header=None)
-    eval_data = pd.read_csv(data_args.eval_file_path, header=None)
+    data = pd.read_csv(data_path, header=None)
     
-    if data_args.dataset_name in NUM_CLASSES:
-        num_classes = NUM_CLASSES[data_args.dataset_name]
+    if dataset_name in NUM_CLASSES:
+        num_classes = NUM_CLASSES[dataset_name]
     else:
-        num_classes = max(train_data.values[:, 0]) + 1
+        num_classes = max(data.values[:, 0]) + 1
         
     logger.info('num_classes is %d', num_classes)
-    data = {
-        'train': DataToDataset(train_data),
-        'eval': DataToDataset(eval_data),
-        'num_classes': num_classes
-    }
-    return data
+    return DataToDataset(data), num_classes
     
 
 class SelfMixDataset(Dataset):

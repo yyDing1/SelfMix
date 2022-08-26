@@ -1,5 +1,5 @@
 {
-    "model_name_or_path": "bert-base-uncased",
+    "pretrained_model_name_or_path": "bert-base-uncased",
     "dropout_rate": 0.1,
     "p_threshold": 0.5,
     "temp": 0.5,
@@ -19,5 +19,6 @@
     "warmup_strategy": "samples",
     "warmup_samples": 5000,
     "train_epochs": 4,
-    "grad_acc_steps": 1
+    "grad_acc_steps": 1,
+    "model_save_path": "save_model/bert-selfmix.pt"
 }

@@ -245,4 +245,4 @@ class SelfMixTrainer:
         return prob
     
     def save_model(self):
-        pass
+        self.model.save(self.training_args.save_path)
