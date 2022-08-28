@@ -73,7 +73,7 @@ python train.py demo_config/trec-bert-asym_train.json
 
 ### Parameters
 
-Details about the meaning of parameters can be seen in our paper and `ModelArguments`, `DataTrainingArguments` and `OurTrainingArguments` in `train.py`
+Details about the meaning of parameters can be seen in our paper and dataclass `ModelArguments`, `DataTrainingArguments` and `OurTrainingArguments` in `train.py`
 
 ## Evaluation
 
@@ -83,4 +83,4 @@ Similarly, you can run evaluation by the following command,
 python evaluation.py demo_config/trec-bert_eval.json
 ```
 
-Details about parameters can be seen in Class `ModelArguments` and `DataEvalArguments` in `evaluation.py`.
+Details about parameters can be seen in dataclass `ModelArguments` and `DataEvalArguments` in `evaluation.py`.
