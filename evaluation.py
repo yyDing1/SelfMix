@@ -94,9 +94,10 @@ def main():
     
     tester = SelfMixTrainer(
         model=model,
-        train_data=None,
-        eval_data=selfmix_eval_data,
-        model_args=None,
-        training_args=None
+        eval_data=selfmix_eval_data
     )
     tester.evaluate()
+
+
+if __name__ == "__main__":
+    main()

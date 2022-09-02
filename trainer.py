@@ -1,6 +1,6 @@
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, classification_report
 from sklearn.mixture import GaussianMixture
-import os, logging
+import os, logging, warnings
 import torch
 import torch.nn as nn
 from torch.optim import Adam
@@ -11,6 +11,8 @@ import torch.nn.functional as F
 
 logger = logging.getLogger(__name__)
 os.environ["TOKENIZERS_PARALLELISM"] = "true"
+warnings.filterwarnings('ignore')
+
 
 def metric(y_true, y_pred):
     accuracy = accuracy_score(y_true, y_pred)
@@ -43,13 +45,14 @@ def compute_kl_loss(p, q, pad_mask=None):
 
 
 class SelfMixTrainer:
-    def __init__(self, model, train_data, eval_data, model_args, training_args):
-        self.model = model
+    def __init__(self, model, train_data=None, eval_data=None, model_args=None, training_args=None):
+        self.model = model.cuda()
         self.train_data = train_data
         self.eval_data = eval_data
         self.model_args = model_args
         self.training_args = training_args
-        self.optimizer = Adam(self.model.parameters(), lr=training_args.lr)
+        if self.training_args is not None:
+            self.optimizer = Adam(self.model.parameters(), lr=training_args.lr)
     
     def warmup(self):
         logger.info("***** Warmup stage *****")
@@ -93,14 +96,14 @@ class SelfMixTrainer:
                 if now_samples >= warmup_samples:
                     logger.info("Warmup Stage ends in %d samples", now_samples)
                         
-            logger.info("Warmup train samples [{}/{}], Loss: {:4F}, Accuracy: {:.2%}"
+            logger.info("Warmup train samples [{:6d}/{:6d}], Loss: {:4f}, Accuracy: {:.2%}"
                         .format(now_samples, warmup_samples, train_loss / len(train_loader), train_acc / len(train_loader.dataset)))
                     
             if self.eval_data is not None:
                 eval_loader = self.eval_data.run("all")
                 eval_res = self.evaluate(eval_loader)
-                logger.info("Warmup Eval Results: Accuracy: {:.2%}, Precision: {:.2%}, Recall: {:.2%}, F1: {:.2%}"
-                            .format(eval_res['accuracy'], eval_res['precision'], eval_res['recall'], eval_res['f1']))
+                # logger.info("Warmup Eval Results: Accuracy: {:.2%}, Precision: {:.2%}, Recall: {:.2%}, F1: {:.2%}"
+                #             .format(eval_res['accuracy'], eval_res['precision'], eval_res['recall'], eval_res['f1']))
             
     def evaluate(self, eval_loader=None):
         if eval_loader is None:
@@ -117,7 +120,7 @@ class SelfMixTrainer:
             y_pred[index] = pred
             
         eval_res = metric(y_true, y_pred)
-        logger.info("Warmup Eval Results: Accuracy: {:.2%}, Precision: {:.2%}, Recall: {:.2%}, F1: {:.2%}"
+        logger.info("Eval Results: Accuracy: {:.2%}, Precision: {:.2%}, Recall: {:.2%}, F1: {:.2%}"
             .format(eval_res['accuracy'], eval_res['precision'], eval_res['recall'], eval_res['f1']))
     
     def train(self):
@@ -131,7 +134,7 @@ class SelfMixTrainer:
             pred = (prob > self.model_args.p_threshold)
             labeled_train_loader, unlabeled_train_loader = self.train_data.run("train", pred, prob)
             
-            logger.info("*** Train epoch %d ***", epoch_id)
+            logger.info("***   Train epoch  %d ***", epoch_id)
             self._train_epoch(labeled_train_loader, unlabeled_train_loader)
             
             logger.info("*** Evaluate epoch %d ***", epoch_id)
@@ -157,8 +160,7 @@ class SelfMixTrainer:
                 inputs_u, att_u, _ = unlabeled_train_iter.next()
 
             
-            targets_x = F.one_hot(targets_x)
-
+            targets_x = F.one_hot(targets_x, num_classes=self.model_args.num_classes)
             inputs_x, inputs_x_att, targets_x = inputs_x.cuda(), inputs_x_att.cuda(), targets_x.cuda(non_blocking=True)
             inputs_u, att_u = inputs_u.cuda(), att_u.cuda()
                         
@@ -225,8 +227,7 @@ class SelfMixTrainer:
                 
         if self.model_args.class_reg:
             labels = np.array(eval_loader.dataset.labels, dtype=int)
-            num_classes = labels.max() + 1
-            for now_class in range(num_classes):
+            for now_class in range(self.model_args.num_classes):
                 indices = np.where(labels == now_class)[0]
                 losses[indices] = (losses[indices] - losses[indices].mean()) / losses[indices].var()
         else:
@@ -234,9 +235,9 @@ class SelfMixTrainer:
         
         gmm = GaussianMixture(
             n_components=2, 
-            max_iter=self.model_args.max_iter, 
-            tol=self.model_args.tol, 
-            reg_covar=self.model_args.reg_covar
+            max_iter=self.model_args.gmm_max_iter, 
+            tol=self.model_args.gmm_tol, 
+            reg_covar=self.model_args.gmm_reg_covar
         )
         losses = losses.reshape(-1, 1)
         gmm.fit(losses)
@@ -245,4 +246,4 @@ class SelfMixTrainer:
         return prob
     
     def save_model(self):
-        self.model.save(self.training_args.save_path)
+        self.model.save_model(self.training_args.model_save_path)

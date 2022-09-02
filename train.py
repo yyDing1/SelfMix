@@ -181,13 +181,14 @@ def main():
     train_datasets, train_num_classes = load_dataset(data_args.train_file_path, data_args.dataset_name)
     eval_datasets, eval_num_classes = load_dataset(data_args.eval_file_path, data_args.dataset_name)
     assert train_num_classes == eval_num_classes
+    model_args.num_classes = train_num_classes
     
     tokenizer = AutoTokenizer.from_pretrained(model_args.pretrained_model_name_or_path)
     selfmix_train_data = SelfMixData(data_args, train_datasets, tokenizer)
     selfmix_eval_data = SelfMixData(data_args, eval_datasets, tokenizer)
     
     # load model
-    model = Bert4Classify(model_args.pretrained_model_name_or_path, model_args.dropout_rate, train_num_classes)
+    model = Bert4Classify(model_args.pretrained_model_name_or_path, model_args.dropout_rate, model_args.num_classes)
     
     # build trainer
     trainer = SelfMixTrainer(
